@@ -1,10 +1,10 @@
                                              __                        
                                             /\ \                       
                       _ __    __     __     \_\ \    ___ ___      __   
-                     /\  __\/ __ \ / __ \   / _  \ /  __  __ \  / __ \ 
-                     \ \ \//\  __//\ \_\ \_/\ \_\ \/\ \/\ \/\ \/\  __/ 
+                     /\  __\/ __ \ / __ \   / _  \  / __  __ \  / __ \ 
+                     \ \ \//\  __//\ \_\ \ /\ \_\ \/\ \/\ \/\ \/\  __/ 
                       \ \_\\ \____\ \__/\_\\ \__/\_\ \_\ \_\ \_\ \____\
-                       \/_/ \/____/\/__/\/_/\/__/\_/\/_/\/_/\/_/\/____/
+                       \/_/ \/____/\/__/\_/ \/__/\_/\/_/\/_/\/_/\/____/
 					   
 	First, put your .idfx files into a folder named "/resources/" inside this project's main folder.
 	Then, simply run the program (.idfx files will be found in sub-directories, recursively). 
