@@ -14,24 +14,16 @@ public class Revision {
 		this.setSequentialNumber(sequentialNumber);
 	}
 
-	public void modifyBreakIndex(int amount) {
-		this.setBreakIndex(this.getBreakIndex() + amount);
-	}
-
-	public void modifyRevisionIndex(int amount) {
-		this.setRevisionIndex(this.getRevisionIndex() + amount);
-	}
-
 	public int getBreakIndex() {
 		return this.breakIndex;
 	}
 
-	public String getRevisionText() {
-		return this.revisionText;
-	}
-
 	public int getRevisionIndex() {
 		return this.revisionIndex;
+	}
+
+	public String getRevisionText() {
+		return this.revisionText;
 	}
 
 	public int getSequentialNumber() {
@@ -40,6 +32,14 @@ public class Revision {
 
 	public RevisionType getType() {
 		return this.type;
+	}
+
+	public void modifyBreakIndex(final int amount) {
+		this.setBreakIndex(this.getBreakIndex() + amount);
+	}
+
+	public void modifyRevisionIndex(final int amount) {
+		this.setRevisionIndex(this.getRevisionIndex() + amount);
 	}
 
 	public void setBreakIndex(final int breakIndex) {

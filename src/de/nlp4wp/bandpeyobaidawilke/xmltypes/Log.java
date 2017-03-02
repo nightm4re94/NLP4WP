@@ -28,6 +28,10 @@ public class Log {
 		return this.eventList;
 	}
 
+	public String getFilePath() {
+		return this.filePath;
+	}
+
 	public Map<Integer, String> getFinalText() {
 		return this.finalText;
 	}
@@ -50,20 +54,16 @@ public class Log {
 		this.eventList = eventList;
 	}
 
+	public void setFilePath(final String filePath) {
+		this.filePath = filePath;
+	}
+
 	public void setMeta(final Meta meta) {
 		this.meta = meta;
 	}
 
 	public void setSession(final Session session) {
 		this.session = session;
-	}
-
-	public String getFilePath() {
-		return filePath;
-	}
-
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
 	}
 
 }

@@ -1,9 +1,7 @@
 package de.nlp4wp.bandpeyobaidawilke;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,13 +14,14 @@ import de.nlp4wp.bandpeyobaidawilke.xmltypes.Part;
 
 public class LogAnalyzer {
 	private static final Logger LOGGER = Logger.getLogger(LogAnalyzer.class.getName());
-	private Log log;
-	private List<Entry> metaEntries;
+	private final Log log;
+	private final List<Entry> metaEntries;
 
-	private List<Entry> sessionEntries;
+	private final List<Entry> sessionEntries;
 
-	private List<Event> eventList;
-	private List<String> revisedText;
+	private final List<Event> eventList;
+	private final List<String> revisedText;
+	private List<String> sNotation;
 
 	public LogAnalyzer(final Log log) {
 		this.log = log;
@@ -43,9 +42,7 @@ public class LogAnalyzer {
 			int position = -1;
 			String key = null;
 			String value = null;
-			int start = -1;
 			int end = -1;
-			String newText = null;
 			String before = null;
 			String after = null;
 
@@ -62,7 +59,7 @@ public class LogAnalyzer {
 				// replacement events
 				// extract start index
 				if (part.getStart() >= 0) {
-					start = part.getStart();
+					part.getStart();
 				}
 				// extract end index
 				if (part.getEnd() >= 0) {
@@ -70,7 +67,7 @@ public class LogAnalyzer {
 				}
 				// extract newText
 				if (part.getNewText() != null && !part.getNewText().isEmpty()) {
-					newText = part.getNewText();
+					part.getNewText();
 				}
 				// -------------------------------------------------------------
 				// keyboard events
@@ -100,70 +97,91 @@ public class LogAnalyzer {
 				// value: " + value + " key: " + key);
 				if (key.equals("VK_BACK")) {
 					if (lastRevision == null) {
-						lastRevision = new Revision(log.getRevisions().size());
+						lastRevision = new Revision(this.log.getRevisions().size());
 						lastRevision.setType(RevisionType.DELETION);
+						lastRevision.setBreakIndex(lastTextPosition);
+						lastRevision.setRevisionIndex(position);
 					} else if (position != lastRevision.getRevisionIndex()) {
-						lastRevision = new Revision(log.getRevisions().size());
+						this.log.addRevision(lastRevision);
+						lastRevision = new Revision(this.log.getRevisions().size());
 						lastRevision.setType(RevisionType.DELETION);
-
+						lastRevision.setBreakIndex(lastTextPosition);
+						lastRevision.setRevisionIndex(position);
 					}
-					String prevText = lastRevision.getRevisionText();
+					final String prevText = lastRevision.getRevisionText();
 					if (prevText != null) {
-						lastRevision.setRevisionText(revisedText.get(position - 1) + lastRevision.getRevisionText());
+						lastRevision
+								.setRevisionText(this.revisedText.get(position - 1) + lastRevision.getRevisionText());
 					} else {
 						if (position != 0) {
-							lastRevision.setRevisionText(revisedText.get(position - 1));
+							lastRevision.setRevisionText(this.revisedText.get(position - 1));
 						}
 
 					}
-					lastRevision.setRevisionIndex(position - 1);
+					for (final Revision rev : this.log.getRevisions()) {
+						if (rev.getRevisionIndex() >= position) {
+							rev.modifyRevisionIndex(-1);
+						}
+						if (rev.getBreakIndex() >= position) {
+							rev.modifyBreakIndex(-1);
+						}
+					}
+					lastRevision.modifyRevisionIndex(1);
 					if (position != 0) {
-						revisedText.remove(position - 1);
+						this.revisedText.remove(position - 1);
 					}
 
 				} else {
-					revisedText.add(position, value);
-				}
-
-			}
-			// replacement events
-			// TODO: Add revision handling (deleting and inserting)
-			else if (event.getType().equals("replacement") && start >= 0 && end >= 0 && newText != null
-					&& !newText.isEmpty()) {
-				// System.out.println("replacement: startIndex: " + start + "
-				// endIndex: " + end + " newText: " + newText);
-				// System.out.println((end - start));
-				// System.out.println(start + " - " + end + " - " + newText);
-				for (int i = 0; i < end - start; i++) {
-					if (i < newText.length()) {
-						Character c = newText.charAt(i);
-						int charInd = start + i;
-						if (charInd < revisedText.size()) {
-							revisedText.set(charInd, c.toString());
-						} else {
-							revisedText.add(charInd, c.toString());
-
+					this.revisedText.add(position, value);
+					for (final Revision rev : this.log.getRevisions()) {
+						if (rev.getRevisionIndex() >= position) {
+							rev.modifyRevisionIndex(+1);
 						}
-					} else {
-						revisedText.remove(start + newText.length());
+						if (rev.getBreakIndex() >= position) {
+							rev.modifyBreakIndex(+1);
+						}
 					}
 				}
+
 			}
-			// insertion events (Zwischenablage o.Ä.
-			// TODO: add revision handling
+			// // replacement events
+			// // TODO: Add revision handling (deleting and inserting)
+			// else if (event.getType().equals("replacement") && start >= 0 &&
+			// end >= 0 && newText != null
+			// && !newText.isEmpty()) {
+			// // System.out.println("replacement: startIndex: " + start + "
+			// // endIndex: " + end + " newText: " + newText);
+			// // System.out.println((end - start));
+			// // System.out.println(start + " - " + end + " - " + newText);
+			// for (int i = 0; i < end - start; i++) {
+			// if (i < newText.length()) {
+			// Character c = newText.charAt(i);
+			// int charInd = start + i;
+			// if (charInd < revisedText.size()) {
+			// revisedText.set(charInd, c.toString());
+			// } else {
+			// revisedText.add(charInd, c.toString());
+			//
+			// }
+			// } else {
+			// revisedText.remove(start + newText.length());
+			// }
+			// }
+			// }
+			// insertion events (Zwischenablage o.Ä.)
 			else if (event.getType().equals("insert") && position >= 0 && (before != null || after != null)) {
 				// System.out.println(
 				// "insertion: position: " + position + " text before: " +
 				// before + " text after: " + after);
-				Revision newRevision = new Revision(log.getRevisions().size());
+				final Revision newRevision = new Revision(this.log.getRevisions().size());
 				newRevision.setType(RevisionType.INSERTION);
 				newRevision.setRevisionIndex(position);
 				newRevision.setBreakIndex(lastTextPosition);
 
 				for (int i = 0; i < after.length(); i++) {
-					Character c = after.toCharArray()[i];
-					revisedText.add((position + i), c.toString());
-					for (Revision rev : log.getRevisions()) {
+					final Character c = after.toCharArray()[i];
+					this.revisedText.add(position + i, c.toString());
+					for (final Revision rev : this.log.getRevisions()) {
 						if (rev.getBreakIndex() >= position) {
 							rev.modifyBreakIndex(+1);
 						}
@@ -179,7 +197,7 @@ public class LogAnalyzer {
 
 				}
 				lastRevision = newRevision;
-				log.addRevision(lastRevision);
+				this.log.addRevision(lastRevision);
 			}
 			if (position >= 0) {
 				lastTextPosition = position;
@@ -190,7 +208,7 @@ public class LogAnalyzer {
 		System.out.println(this.log.getFilePath());
 		for (
 
-		Revision rev : this.log.getRevisions()) {
+		final Revision rev : this.log.getRevisions()) {
 			System.out.println(rev.getType() + " " + rev.getSequentialNumber() + " - " + rev.getRevisionIndex() + " - "
 					+ rev.getRevisionText());
 			System.out.println(rev.getBreakIndex());

@@ -22,16 +22,6 @@ public class Program {
 		return program;
 	}
 
-	public static void main(final String a[]) {
-		Program.instance().searchFiles();
-		Program.instance().createLogs();
-		for (final Log log : Program.instance().logs) {
-			LogAnalyzer analyzer = new LogAnalyzer(log);
-			analyzer.analyzeLog();
-		}
-
-	}
-
 	private List<Log> logs;
 
 	private List<String> filePaths;
@@ -39,6 +29,16 @@ public class Program {
 	private Program() {
 		Program.this.filePaths = new ArrayList<>();
 		Program.this.logs = new ArrayList<>();
+	}
+
+	public static void main(final String a[]) {
+		Program.instance().searchFiles();
+		Program.instance().createLogs();
+		for (final Log log : Program.instance().logs) {
+			final LogAnalyzer analyzer = new LogAnalyzer(log);
+			analyzer.analyzeLog();
+		}
+
 	}
 
 	private void createLogs() {
