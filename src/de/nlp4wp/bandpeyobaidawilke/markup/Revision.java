@@ -1,61 +1,37 @@
 package de.nlp4wp.bandpeyobaidawilke.markup;
 
-public class Revision {
-	public enum RevisionType {
-		INSERTION, DELETION;
-	}
+import java.util.ArrayList;
 
-	private String revisionText;
-	private int revisionIndex = -1, breakIndex = -1, sequentialNumber = 1;
+public abstract class Revision {
 
-	private RevisionType type;
+	private ArrayList<Symbol> revisionSymbols;
+	private int sequentialNumber = 1;
 
 	public Revision(final int sequentialNumber) {
 		this.setSequentialNumber(sequentialNumber);
+		this.revisionSymbols = new ArrayList<>();
 	}
 
-	public int getBreakIndex() {
-		return this.breakIndex;
+	public int getLastPosition() {
+		if (this.getRevisionSymbols().size() == 0) {
+			return -1;
+		}
+		return this.getRevisionSymbols().get(this.getRevisionSymbols().size() - 1).getPosition();
 	}
 
-	public int getRevisionIndex() {
-		return this.revisionIndex;
+	public int getFirstPosition() {
+		if (this.getRevisionSymbols().size() == 0) {
+			return -1;
+		}
+		return this.getRevisionSymbols().get(0).getPosition();
 	}
 
-	public String getRevisionText() {
-		return this.revisionText;
+	public ArrayList<Symbol> getRevisionSymbols() {
+		return this.revisionSymbols;
 	}
 
 	public int getSequentialNumber() {
 		return this.sequentialNumber;
-	}
-
-	public RevisionType getType() {
-		return this.type;
-	}
-
-	public void modifyBreakIndex(final int amount) {
-		this.setBreakIndex(this.getBreakIndex() + amount);
-	}
-
-	public void modifyRevisionIndex(final int amount) {
-		this.setRevisionIndex(this.getRevisionIndex() + amount);
-	}
-
-	public void setBreakIndex(final int breakIndex) {
-		this.breakIndex = breakIndex;
-	}
-
-	public void setRevisionIndex(final int firstIndex) {
-		this.revisionIndex = firstIndex;
-	}
-
-	public void setRevisionText(final String deletedText) {
-		this.revisionText = deletedText;
-	}
-
-	public void setType(final RevisionType type) {
-		this.type = type;
 	}
 
 	private void setSequentialNumber(final int sequentialNumber) {

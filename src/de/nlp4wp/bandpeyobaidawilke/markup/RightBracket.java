@@ -1,13 +1,11 @@
 package de.nlp4wp.bandpeyobaidawilke.markup;
 
-public class RightBracket extends Symbol {
+public class RightBracket extends MarkupSymbol {
 	private int breakIndex;
 
 	public RightBracket(final int position, final int breakIndex) {
 		super(position, "]" + breakIndex);
 		this.setBreakIndex(breakIndex);
-		this.setActive(false);
-
 	}
 
 	public int getBreakIndex() {
