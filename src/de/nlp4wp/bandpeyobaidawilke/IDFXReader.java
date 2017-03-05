@@ -1,7 +1,6 @@
 package de.nlp4wp.bandpeyobaidawilke;
 
 import java.io.File;
-import java.util.logging.Level;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;

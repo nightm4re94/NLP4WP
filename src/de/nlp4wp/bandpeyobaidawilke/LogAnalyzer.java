@@ -107,24 +107,63 @@ public class LogAnalyzer {
         // System.out.println("keyPress: position: " + position + "
         // value: " + value + " key: " + key);
         if (key.equals("VK_BACK")) {
-          if (lastRevision == null) {
-            lastRevision = new Deletion(this.log.getRevisions().size());
-
-          } else if (position != lastRevision.getFirstPosition()) {
-            this.log.addRevision(lastRevision);
-            lastRevision = new Deletion(this.log.getRevisions().size());
-
-          }
-
-          if (position != 0) {
+          // is there a selection left or right of the current position? if so,
+          // delete the whole selection from the revised text.
+          if (lastSelectionStart == position - 1 || lastSelectionEnd == position) {
+            log.addRevision(lastRevision);
+            lastRevision = new Deletion(log.getRevisions().size());
+            for (int i = lastSelectionStart; i < lastSelectionEnd; i++) {
+              lastRevision.getRevisionSymbols().add(new Symbol(lastSelectionStart + i, this.revisedText.get(lastSelectionStart + i).getCharacter()));
+              this.revisedText.get(i).setActive(false);
+            }
+          } else if (this.revisedText.get(position - 1) != null) {
+            this.revisedText.get(position - 1).setActive(false);
+            // is the last symbol of the last deletion the current character?
+            // if so, add the character to the revision and deactivate the
+            // symbols in the text.
+            if (lastRevision instanceof Deletion && lastRevision.getFirstPosition() == position) {
+              lastRevision.getRevisionSymbols().add(this.revisedText.get(position));
+            } else if (lastTextPosition == position) {
+              log.addRevision(lastRevision);
+              lastRevision = new Deletion(log.getRevisions().size());
+            }
           }
 
         } else if (key.equals("VK_DELETE")) {
+          // is there a selection left or right of the current position? if so,
+          // delete the whole selection from the revised text.
+          if (lastSelectionStart == position || lastSelectionEnd == position) {
+            log.addRevision(lastRevision);
+            lastRevision = new Deletion(log.getRevisions().size());
+            for (int i = lastSelectionStart; i < lastSelectionEnd; i++) {
+              lastRevision.getRevisionSymbols().add(new Symbol(lastSelectionStart + i, this.revisedText.get(lastSelectionStart + i).getCharacter()));
+              this.revisedText.get(i).setActive(false);
+            }
+            // is the first symbol of the last deletion the current character?
+            // if so, add the character to the revision and deactivate the
+            // symbols in the text.
+          } else if (lastRevision instanceof Deletion && lastRevision.getLastPosition() == position - 1) {
+            lastRevision.getRevisionSymbols().add(this.revisedText.get(position));
+          } else {
+            log.addRevision(lastRevision);
+            lastRevision = new Deletion(log.getRevisions().size());
+            this.revisedText.get(position).setActive(false);
+          }
 
-        }
-
-        else {
-          this.revisedText.add(new Symbol(position, value));
+        } else {
+          this.revisedText.add(position, new Symbol(position, value));
+          if (lastRevision != null && position != maxTextIndex && lastRevision.getLastPosition() != position - 1) {
+            log.addRevision(lastRevision);
+            lastRevision = new Insertion(log.getRevisions().size());
+            lastRevision.getRevisionSymbols().add(new Symbol(position, value));
+          } else if (lastRevision != null && lastRevision.getLastPosition() == position - 1) {
+            lastRevision.getRevisionSymbols().add(new Symbol(position, value));
+          } else if (lastRevision != null && (log.getRevisions().size() == 0 || log.getRevisions().get(log.getRevisions().size() - 1) != lastRevision)) {
+            log.addRevision(lastRevision);
+          }
+          lastTextPosition = position;
+          // System.out.println(position + " - " + value);
+          // System.out.println(this.revisedText.get(position).getCharacter());
 
         }
       }
@@ -136,39 +175,13 @@ public class LogAnalyzer {
         // endIndex: " + end + " newText: " + newText);
         // System.out.println((end - start));
         // System.out.println(start + " - " + end + " - " + newText);
-        for (int i = 0; i < end - start; i++) {
-          if (i < newText.length()) {
-            Character c = newText.charAt(i);
-            int charInd = start + i;
-            if (charInd < revisedText.numberOfActiveSymbols()) {
-              revisedText.set(charInd, new Symbol(charInd, c.toString()));
-            } else {
-              revisedText.add(charInd, new Symbol(charInd, c.toString()));
 
-            }
-          } else {
-            revisedText.remove(start + newText.length());
-          }
-        }
       }
       // insertion events (Zwischenablage o.Ä.)
       else if (event.getType().equals("insert") && position >= 0 && (before != null || after != null)) {
         // System.out.println(
         // "insertion: position: " + position + " text before: " +
         // before + " text after: " + after);
-        final Insertion newRevision = new Insertion(this.log.getRevisions().size());
-        for (int i = 0; i < after.length(); i++) {
-          final Character c = after.toCharArray()[i];
-          this.revisedText.add(new Symbol(position + i, c.toString()));
-
-        }
-        lastRevision = newRevision;
-        this.log.addRevision(lastRevision);
-      }
-      if (position >= 0) {
-        lastTextPosition = position;
-      } else if (end >= 0) {
-        lastTextPosition = end;
       }
     }
     System.out.println(this.log.getFilePath());
@@ -184,7 +197,19 @@ public class LogAnalyzer {
     System.out.println("The total text is " + (maxTextIndex + 1) + " characters long.");
     final StringBuilder builder = new StringBuilder();
     for (final Symbol c : this.revisedText) {
-      builder.append(c.getCharacter());
+      if (c.isActive()) {
+        builder.append(c.getCharacter());
+      } else {
+        builder.append("[]");
+      }
+    }
+    for (Revision rev : log.getRevisions()) {
+      final StringBuilder sb = new StringBuilder();
+
+      for (Symbol symbol : rev.getRevisionSymbols()) {
+        sb.append(symbol.getCharacter());
+      }
+      // System.out.println(sb.toString());
     }
     System.out.println(builder.toString());
   }
