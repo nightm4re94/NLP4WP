@@ -197,8 +197,7 @@ public class LogAnalyzer {
         this.eventList.add(e);
       }
     } catch (final Exception e1) {
-      Program.LOGGER.log(Level.SEVERE, e1.toString(), e1);
-      e1.printStackTrace();
+      Program.logException(e1);
     }
   }
 
@@ -209,8 +208,7 @@ public class LogAnalyzer {
         this.metaEntries.add(e);
       }
     } catch (final Exception e1) {
-      Program.LOGGER.log(Level.SEVERE, e1.toString(), e1);
-      e1.printStackTrace();
+      Program.logException(e1);
     }
   }
 
@@ -221,7 +219,7 @@ public class LogAnalyzer {
         this.sessionEntries.add(e);
       }
     } catch (final Exception e1) {
-      Program.LOGGER.log(Level.SEVERE, e1.toString(), e1);
+      Program.logException(e1);
     }
   }
 }

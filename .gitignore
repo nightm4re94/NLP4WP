@@ -1,5 +1,9 @@
 /bin/
 
+# Resource files
+/resources/Greek/
+/resources/German Data/
+
 # Compiled class file
 *.class
 

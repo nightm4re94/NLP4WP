@@ -2,6 +2,8 @@ package de.nlp4wp.bandpeyobaidawilke;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
@@ -35,7 +37,7 @@ public class Program {
     Program.this.filePaths = new ArrayList<>();
     Program.this.logs = new ArrayList<>();
     ConsoleHandler handler = new ConsoleHandler();
-    handler.setFormatter(new de.nlp4wp.bandpeyobaidawilke.SimpleFormatter());
+    handler.setFormatter(new de.nlp4wp.bandpeyobaidawilke.OneLineFormatter());
     handler.setLevel(Level.ALL);
     FileHandler fh;
     try {
@@ -51,6 +53,12 @@ public class Program {
   }
 
   public static void main(final String a[]) {
+    Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+      public void uncaughtException(Thread t, Throwable e) {
+        logException(e);
+      }
+    });
+
     Program.instance().searchFiles();
     Program.instance().createLogs();
     for (final Log log : Program.instance().logs) {
@@ -85,5 +93,12 @@ public class Program {
       }
     }
 
+  }
+
+  public static void logException(Throwable e) {
+    StringWriter sw = new StringWriter();
+    e.printStackTrace(new PrintWriter(sw));
+    String stacktrace = sw.toString();
+    LOGGER.log(Level.SEVERE, stacktrace, e);
   }
 }
