@@ -1,6 +1,7 @@
 package de.nlp4wp.bandpeyobaidawilke;
 
 import java.io.File;
+import java.util.logging.Level;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -18,6 +19,7 @@ public class IDFXReader {
 			log.setFilePath(filePath);
 			return log;
 		} catch (final Exception e) {
+		  Program.LOGGER.log(Level.SEVERE, e.toString(), e);
 			e.printStackTrace();
 			return null;
 		}
