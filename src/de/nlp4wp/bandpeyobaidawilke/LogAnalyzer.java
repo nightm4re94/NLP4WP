@@ -116,63 +116,54 @@ public class LogAnalyzer {
 						this.log.addRevision(lastRevision);
 						lastRevision = new Deletion(this.log.getRevisions().size());
 						for (int i = lastSelectionStart; i < lastSelectionEnd; i++) {
-							lastRevision.getRevisionSymbols().add(new Symbol(lastSelectionStart + i,
-									this.revisedText.get(lastSelectionStart + i).getCharacter()));
-							this.revisedText.get(i).setActive(false);
+							lastRevision.getRevisionSymbols().add(new Symbol(lastRevision.getSequentialNumber(),
+									this.revisedText.getSymbolAtPosition(lastSelectionStart + i).getCharacter()));
+							this.revisedText.getSymbolAtPosition(i).setActive(false);
 						}
-					} else if (this.revisedText.get(position - 1) != null) {
-						this.revisedText.get(position - 1).setActive(false);
+					} else if (revisedText.getNumberOfActiveSymbols() > position && position > 0) {
 						// is the last symbol of the last deletion the current
 						// character?
 						// if so, add the character to the revision and
 						// deactivate the
 						// symbols in the text.
-						if (lastRevision instanceof Deletion && lastRevision.getFirstPosition() == position) {
-							lastRevision.getRevisionSymbols().add(this.revisedText.get(position));
-						} else if (lastTextPosition == position) {
-							this.log.addRevision(lastRevision);
-							lastRevision = new Deletion(this.log.getRevisions().size());
-						}
-					}
-
-				} else if (key.equals("VK_DELETE")) {
-					// is there a selection left or right of the current
-					// position? if so,
-					// delete the whole selection from the revised text.
-					if (lastSelectionStart == position || lastSelectionEnd == position) {
 						this.log.addRevision(lastRevision);
 						lastRevision = new Deletion(this.log.getRevisions().size());
-						for (int i = lastSelectionStart; i < lastSelectionEnd; i++) {
-							lastRevision.getRevisionSymbols().add(new Symbol(lastSelectionStart + i,
-									this.revisedText.get(lastSelectionStart + i).getCharacter()));
-							this.revisedText.get(i).setActive(false);
-						}
-						// is the first symbol of the last deletion the current
-						// character?
-						// if so, add the character to the revision and
-						// deactivate the
-						// symbols in the text.
-					} else if (lastRevision instanceof Deletion && lastRevision.getLastPosition() == position - 1) {
-						lastRevision.getRevisionSymbols().add(this.revisedText.get(position));
-					} else {
-						this.log.addRevision(lastRevision);
-						lastRevision = new Deletion(this.log.getRevisions().size());
-						this.revisedText.get(position).setActive(false);
+						this.revisedText.getSymbolAtPosition(position - 1).setActive(false);
+						lastRevision.getRevisionSymbols().add(this.revisedText.getSymbolAtPosition(position - 1));
+
 					}
 
-				} else {
-					this.revisedText.add(position, new Symbol(position, value));
-					if (lastRevision != null && position != maxTextIndex
-							&& lastRevision.getLastPosition() != position - 1) {
-						this.log.addRevision(lastRevision);
-						lastRevision = new Insertion(this.log.getRevisions().size());
-						lastRevision.getRevisionSymbols().add(new Symbol(position, value));
-					} else if (lastRevision != null && lastRevision.getLastPosition() == position - 1) {
-						lastRevision.getRevisionSymbols().add(new Symbol(position, value));
-					} else if (lastRevision != null && (this.log.getRevisions().size() == 0
-							|| this.log.getRevisions().get(this.log.getRevisions().size() - 1) != lastRevision)) {
-						this.log.addRevision(lastRevision);
-					}
+				}
+				// else if (key.equals("VK_DELETE")) {
+				// // is there a selection left or right of the current
+				// // position? if so,
+				// // delete the whole selection from the revised text.
+				// if (lastSelectionStart == position || lastSelectionEnd ==
+				// position) {
+				// this.log.addRevision(lastRevision);
+				// lastRevision = new Deletion(this.log.getRevisions().size());
+				// for (int i = lastSelectionStart; i < lastSelectionEnd; i++) {
+				// lastRevision.getRevisionSymbols().add(new
+				// Symbol(lastRevision.getSequentialNumber(),
+				// this.revisedText.get(lastSelectionStart +
+				// i).getCharacter()));
+				// this.revisedText.get(i).setActive(false);
+				// }
+				// // is the first symbol of the last deletion the current
+				// // character?
+				// // if so, add the character to the revision and
+				// // deactivate the
+				// // symbols in the text.
+				// } else {
+				// this.log.addRevision(lastRevision);
+				// lastRevision = new Deletion(this.log.getRevisions().size());
+				// this.revisedText.get(position).setActive(false);
+				// lastRevision.getRevisionSymbols().add(this.revisedText.get(position));
+				//
+				// }
+				// }
+				else {
+					this.revisedText.addSymbolAtPosition(position, new Symbol(0, value));
 					lastTextPosition = position;
 					// System.out.println(position + " - " + value);
 					// System.out.println(this.revisedText.get(position).getCharacter());

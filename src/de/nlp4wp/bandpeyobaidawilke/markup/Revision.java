@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 public abstract class Revision {
 
-	private final ArrayList<Symbol> revisionSymbols;
+	private final SymbolContainer revisionSymbols;
 	private int sequentialNumber = 1;
 
 	public Revision(final int sequentialNumber) {
 		this.setSequentialNumber(sequentialNumber);
-		this.revisionSymbols = new ArrayList<>();
+		this.revisionSymbols = new SymbolContainer();
 	}
 
 	public int getFirstPosition() {
@@ -26,7 +26,7 @@ public abstract class Revision {
 		return this.getRevisionSymbols().get(this.getRevisionSymbols().size() - 1).getPosition();
 	}
 
-	public ArrayList<Symbol> getRevisionSymbols() {
+	public SymbolContainer getRevisionSymbols() {
 		return this.revisionSymbols;
 	}
 

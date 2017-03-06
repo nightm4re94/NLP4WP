@@ -12,8 +12,8 @@ public class SymbolContainer extends ArrayList<Symbol> {
 	 */
 	private static final long serialVersionUID = 8691042651739478671L;
 
-	@Override
-	public void add(final int index, final Symbol symbol) {
+	
+	public void addSymbolAtPosition(final int index, final Symbol symbol) {
 		if (this.size() == 0) {
 			super.add(symbol);
 		}
@@ -29,8 +29,8 @@ public class SymbolContainer extends ArrayList<Symbol> {
 
 	}
 
-	@Override
-	public Symbol get(final int arg0) {
+	
+	public Symbol getSymbolAtPosition(final int arg0) {
 		int tmp = -1;
 		for (final Symbol symbol : this) {
 			tmp += symbol.getPositionCount();
@@ -41,7 +41,16 @@ public class SymbolContainer extends ArrayList<Symbol> {
 		return null;
 	}
 
-	public int numberOfActiveSymbols() {
+	public Break getBreak(int sequentialNumber) {
+		for (Symbol b : this) {
+			if (b instanceof Break && ((Break) b).getRevisionNumber() == sequentialNumber) {
+				return (Break) b;
+			}
+		}
+		return null;
+	}
+
+	public int getNumberOfActiveSymbols() {
 		int tmp = -1;
 		for (final Symbol symbol : this) {
 			tmp += symbol.getPositionCount();
