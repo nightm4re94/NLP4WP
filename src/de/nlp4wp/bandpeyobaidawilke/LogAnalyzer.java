@@ -47,7 +47,7 @@ public class LogAnalyzer {
 			String value = null;
 			int end = -1;
 			int start = -1;
-			int lastSelectionStart = -1, lastSelectionEnd = -1;
+			int lastSelectionStart = -1, lastSelectionEnd = -1, lastSelectionLength = -1;
 			String before = null;
 			String after = null;
 			String newText = null;
@@ -101,6 +101,7 @@ public class LogAnalyzer {
 			if (event.getType().equals("selection") && start >= 0 && end >= 0) {
 				lastSelectionStart = start;
 				lastSelectionEnd = end;
+				lastSelectionLength = end - start;
 			}
 
 			// normal typing event
@@ -115,8 +116,8 @@ public class LogAnalyzer {
 					if (lastSelectionStart == position - 1 || lastSelectionEnd == position) {
 						this.log.addRevision(lastRevision);
 						lastRevision = new Deletion(this.log.getRevisions().size());
-						for (int i = lastSelectionStart; i < lastSelectionEnd; i++) {
-							lastRevision.getRevisionSymbols().add(new Symbol(lastRevision.getSequentialNumber(),
+						for (int i = 0; i < lastSelectionLength; i++) {
+							lastRevision.getRevisionSymbols().add(1 + i, new Symbol(lastRevision.getSequentialNumber(),
 									this.revisedText.getSymbolAtPosition(lastSelectionStart + i).getCharacter()));
 							this.revisedText.getSymbolAtPosition(i).setActive(false);
 						}
@@ -129,7 +130,7 @@ public class LogAnalyzer {
 						this.log.addRevision(lastRevision);
 						lastRevision = new Deletion(this.log.getRevisions().size());
 						this.revisedText.getSymbolAtPosition(position - 1).setActive(false);
-						lastRevision.getRevisionSymbols().add(this.revisedText.getSymbolAtPosition(position - 1));
+						lastRevision.getRevisionSymbols().add(1, this.revisedText.getSymbolAtPosition(position - 1));
 
 					}
 
@@ -200,11 +201,10 @@ public class LogAnalyzer {
 		System.out.println("The total text is " + (maxTextIndex + 1) + " characters long.");
 		for (final Revision rev : this.log.getRevisions()) {
 			final StringBuilder sb = new StringBuilder();
-
 			for (final Symbol symbol : rev.getRevisionSymbols()) {
 				sb.append(symbol.getCharacter());
 			}
-			// System.out.println(sb.toString());
+			System.out.println(sb.toString());
 		}
 		System.out.println(this.revisedText.toString());
 	}
