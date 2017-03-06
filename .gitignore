@@ -3,6 +3,7 @@
 # Resource files
 /resources/Greek/
 /resources/German Data/
+/resources/OUTPUT/*
 
 # Compiled class file
 *.class
@@ -20,3 +21,4 @@ log.xml
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
