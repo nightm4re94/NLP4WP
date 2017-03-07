@@ -2,7 +2,6 @@ package de.nlp4wp.bandpeyobaidawilke.markup;
 
 public class Symbol {
 	private int positionCount;
-	private int position;
 	private int revisionNumber;
 	private boolean active;
 	private String character;
@@ -25,20 +24,12 @@ public class Symbol {
 		this.revisionNumber = revisionNumber;
 	}
 
-	public int getPosition() {
-		return this.position;
-	}
-
 	public int getPositionCount() {
 		return this.positionCount;
 	}
 
 	public boolean isActive() {
 		return this.active;
-	}
-
-	public void modifyPosition(final int amount) {
-		this.position += amount;
 	}
 
 	public void setActive(final boolean active) {
@@ -48,10 +39,6 @@ public class Symbol {
 
 	public void setCharacter(final String character) {
 		this.character = character;
-	}
-
-	public void setPosition(final int position) {
-		this.position = position;
 	}
 
 }

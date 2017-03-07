@@ -1,13 +1,10 @@
 package de.nlp4wp.bandpeyobaidawilke.xmltypes;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import de.nlp4wp.bandpeyobaidawilke.markup.Revision;
 
 @XmlRootElement
 public class Log {
@@ -16,15 +13,7 @@ public class Log {
 	private Session session;
 	private List<Event> eventList;
 	private Map<Integer, String> finalText;
-	private final List<Revision> revisions = new ArrayList<>();
 	private String filePath;
-
-	public void addRevision(final Revision revision) {
-		if (revision == null) {
-			return;
-		}
-		this.revisions.add(revision);
-	}
 
 	@XmlElement(name = "event")
 	public List<Event> getEventList() {
@@ -42,10 +31,6 @@ public class Log {
 	@XmlElement(name = "meta")
 	public Meta getMeta() {
 		return this.meta;
-	}
-
-	public List<Revision> getRevisions() {
-		return this.revisions;
 	}
 
 	@XmlElement(name = "session")
