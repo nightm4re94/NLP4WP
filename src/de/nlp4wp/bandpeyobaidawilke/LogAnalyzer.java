@@ -34,23 +34,30 @@ public class LogAnalyzer {
 	}
 
 	public void analyzeLog() {
+
+		int lastSelectionStart = -1, lastSelectionEnd = -1, lastSelectionLength = -1;
+		int charsInclSpaces = 0, charsExclSpaces = 0;
+
 		for (final Event event : this.eventList) {
 			int position = -1;
 			String key = null;
 			String value = null;
 			int end = -1;
 			int start = -1;
-			int lastSelectionStart = -1, lastSelectionEnd = -1, lastSelectionLength = -1;
 			String before = null;
 			String after = null;
 			String newText = null;
-
 			for (final Part part : event.getPartlist()) {
 
 				// extract position
 				if (part.getPosition() >= 0) {
 					position = part.getPosition();
 				}
+				// how many chars are in the text (w/o whitespaces)
+				charsInclSpaces = part.getCharinclspaces();
+
+				// how many chars are in the text (with whitespaces)
+				charsExclSpaces = part.getCharexclspaces();
 
 				// replacement events
 				// extract start index
@@ -168,7 +175,8 @@ public class LogAnalyzer {
 		// System.out.println(rev.getLastPosition());
 		// }
 		System.out.println("Nr. of revisions: " + this.revisedText.getRevision());
-		System.out.println("The total text is " + (this.revisedText.getNumberOfActiveSymbols()) + " characters long.");
+		System.out.println("The total text is " + (this.revisedText.getNumberOfActiveSymbols()) + "/" + charsInclSpaces
+				+ " characters long.");
 		// System.out.println(this.revisedText.getActiveChars());
 		System.out.println(this.revisedText.toString());
 	}

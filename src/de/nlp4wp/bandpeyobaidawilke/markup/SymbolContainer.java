@@ -17,22 +17,31 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		if (firstPos < 0 || lastPos < 0) {
 			return;
 		}
-
-		final Symbol previous = this.getPrevious(this.getSingle(firstPos));
-		if (this.getRevision() == 0 || !(previous instanceof RightBracket)) {
+		int leftBracketPosition = super.indexOf(this.get(firstPos));
+		Symbol previous = this.getPrevious(this.getSingle(firstPos));
+		Symbol next = this.getNext(this.getSingle(lastPos));
+		if (previous instanceof RightBracket && previous.getRevisionNumber() == this.getRevision()
+				|| next instanceof LeftBracket && next.getRevisionNumber() == this.getRevision()) {
+		} else {
 			this.nextRevision();
-			this.insertSingle(firstPos - 1, new LeftBracket(this.getRevision()));
-			this.insertSingle(lastPos, new RightBracket(this.getRevision()));
 		}
+		int symbolsToRemove = lastPos - firstPos;
+		int currentPosition = super.indexOf(this.getSingle(firstPos));
+		Symbol currentSymbol = this.get(currentPosition);
 
-		int tmp = -1;
-		for (final Symbol symbol : this) {
-			tmp += symbol.getPositionCount();
-			if (tmp >= firstPos && tmp <= lastPos) {
-				this.get(tmp).setActive(false);
-				this.setLastEditPosition(tmp);
+		while (symbolsToRemove > 0
+				|| (currentSymbol instanceof Break && currentSymbol.getRevisionNumber() < this.getRevision())
+				|| (currentSymbol instanceof LeftBracket || currentSymbol instanceof RightBracket)) {
+			if (currentSymbol.isActive()) {
+				currentSymbol.setActive(false);
+				symbolsToRemove--;
 			}
+			this.setLastEditPosition(super.indexOf(currentSymbol));
+			currentPosition++;
+			currentSymbol = this.get(currentPosition);
 		}
+		this.add(currentPosition + 1, new RightBracket(this.getRevision()));
+		this.add(leftBracketPosition, new LeftBracket(this.getRevision()));
 	}
 
 	public void deleteSingle(final int position) {
@@ -115,33 +124,19 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 	}
 
 	public void insertMultiple(final int position, final SymbolContainer symbols) {
-		if (position < 0) {
+		if (this.size() == 0) {
+			super.addAll(symbols);
 			return;
 		}
-
-		final Symbol previous = this.getPrevious(this.getSingle(position));
-		if (previous instanceof RightBrace && previous.getRevisionNumber() != this.getRevision()) {
-			this.nextRevision();
-			this.add(super.indexOf(this.getSingle(position)), new LeftBrace(this.getRevision()));
-			this.add(super.indexOf(this.getSingle(position)) + symbols.size(), new RightBrace(this.getRevision()));
-		}
-
-		int tmp = -1;
-		for (final Symbol sym : this) {
-			tmp += sym.getPositionCount();
-			if (tmp == position) {
-				this.addAll(super.indexOf(sym), symbols);
-				this.setLastEditPosition(position);
-				return;
-			}
-		}
-
+		super.addAll(super.indexOf(this.getSingle(position)), symbols);
 	}
 
 	public void insertSingle(final int position, final Symbol symbol) {
-		final SymbolContainer tmp = new SymbolContainer();
-		tmp.add(symbol);
-		this.insertMultiple(position, tmp);
+		if (this.size() == 0) {
+			super.add(symbol);
+			return;
+		}
+		super.add(super.indexOf(this.getSingle(position)), symbol);
 	}
 
 	public void nextRevision() {
