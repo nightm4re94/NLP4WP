@@ -7,45 +7,32 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 	 *
 	 */
 	private static final long serialVersionUID = 8691042651739478671L;
-	private int revision = 0;
+	private int currentRevision = 0;
 
+	private int lastDeletePosition = 0;
+	private int lastInsertPosition = 0;
 	private int lastEditPosition = 0;
 	// the symbols' index needs to depend on the number of active symbols, not
 	// the position in the list.
 
 	public void deleteMultiple(final int firstPos, final int lastPos) {
-		if (firstPos < 0 || lastPos < 0) {
-			return;
+		for (int i = firstPos; i <= lastPos; i++) {
+			this.deleteSingle(i);
 		}
-		int leftBracketPosition = super.indexOf(this.get(firstPos));
-		Symbol previous = this.getPrevious(this.getSingle(firstPos));
-		Symbol next = this.getNext(this.getSingle(lastPos));
-		if (previous instanceof RightBracket && previous.getRevisionNumber() == this.getRevision()
-				|| next instanceof LeftBracket && next.getRevisionNumber() == this.getRevision()) {
-		} else {
-			this.nextRevision();
-		}
-		int symbolsToRemove = lastPos - firstPos;
-		int currentPosition = super.indexOf(this.getSingle(firstPos));
-		Symbol currentSymbol = this.get(currentPosition);
-
-		while (symbolsToRemove > 0
-				|| (currentSymbol instanceof Break && currentSymbol.getRevisionNumber() < this.getRevision())
-				|| (currentSymbol instanceof LeftBracket || currentSymbol instanceof RightBracket)) {
-			if (currentSymbol.isActive()) {
-				currentSymbol.setActive(false);
-				symbolsToRemove--;
-			}
-			this.setLastEditPosition(super.indexOf(currentSymbol));
-			currentPosition++;
-			currentSymbol = this.get(currentPosition);
-		}
-		this.add(currentPosition + 1, new RightBracket(this.getRevision()));
-		this.add(leftBracketPosition, new LeftBracket(this.getRevision()));
 	}
 
 	public void deleteSingle(final int position) {
-		this.deleteMultiple(position, position);
+		if (position < 0 || this.getSingle(position) == null) {
+			return;
+		}
+		// if (!this.isNeighbor(position, this.lastDeletePosition)) {
+		// this.nextRevision();
+		// this.add(position + 1, new RightBracket(this.getRevision()));
+		// this.add(position, new LeftBracket(this.getRevision()));
+		// }
+		Symbol s = this.getSingle(position);
+		s.setActive(false);
+		this.setLastDeletePosition(super.indexOf(s));
 	}
 
 	public String getActiveChars() {
@@ -68,8 +55,16 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		return null;
 	}
 
+	public int getLastDeletePosition() {
+		return this.lastDeletePosition;
+	}
+
 	public int getLastEditPosition() {
 		return this.lastEditPosition;
+	}
+
+	public int getLastInsertPosition() {
+		return this.lastInsertPosition;
 	}
 
 	public SymbolContainer getMultiple(final int firstPos, final int lastPos) {
@@ -109,7 +104,7 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 	}
 
 	public int getRevision() {
-		return this.revision;
+		return this.currentRevision;
 	}
 
 	public Symbol getSingle(final int position) {
@@ -124,25 +119,40 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 	}
 
 	public void insertMultiple(final int position, final SymbolContainer symbols) {
-		if (this.size() == 0) {
-			super.addAll(symbols);
-			return;
+		for (Symbol s : symbols) {
+			this.insertSingle(position + symbols.indexOf(s), s);
+
 		}
-		super.addAll(super.indexOf(this.getSingle(position)), symbols);
+
 	}
 
 	public void insertSingle(final int position, final Symbol symbol) {
-		if (this.size() == 0) {
-			super.add(symbol);
+		if (position < 0) {
 			return;
 		}
-		super.add(super.indexOf(this.getSingle(position)), symbol);
+		int positionToAdd = 0;
+		if (this.getSingle(position) == null || position == this.getNumberOfActiveSymbols()) {
+			positionToAdd = this.getNumberOfActiveSymbols();
+			this.firstRevision();
+
+		} else {
+			if (!(symbol instanceof MarkupSymbol || this.isNeighbor(position, lastInsertPosition))) {
+				this.nextRevision();
+			}
+			positionToAdd = this.indexOf(this.getSingle(position)) + 1;
+		}
+		super.add(positionToAdd, symbol);
+		this.setLastInsertPosition(positionToAdd);
 	}
 
 	public void nextRevision() {
-		this.revision++;
-		Break b = new Break(getRevision());
-		this.insertSingle(this.getLastEditPosition(), b);
+		this.currentRevision++;
+		// Break b = new Break(this.getRevision());
+		// this.insertSingle(this.getLastEditPosition(), b);
+	}
+
+	public void firstRevision() {
+		this.currentRevision = 0;
 	}
 
 	public void replace(final int firstPos, final int lastPos, final SymbolContainer c) {
@@ -164,8 +174,22 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		}
 	}
 
-	public void setLastEditPosition(final int lastEditPosition) {
-		this.lastEditPosition = lastEditPosition;
+	private void setLastEditPosition(final int editPosition) {
+		this.lastEditPosition = editPosition;
+	}
+
+	private void setLastDeletePosition(final int editPosition) {
+		this.setLastEditPosition(editPosition);
+		this.lastDeletePosition = editPosition;
+	}
+
+	private void setLastInsertPosition(final int editPosition) {
+		this.setLastEditPosition(editPosition);
+		this.lastInsertPosition = editPosition;
+	}
+
+	private boolean isNeighbor(final int position, final int positionToCompare) {
+		return (position == positionToCompare + 1 || position == positionToCompare - 1);
 	}
 
 	@Override

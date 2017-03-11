@@ -12,6 +12,11 @@ public class Symbol {
 		this.setCharacter(character);
 	}
 
+	public Symbol(final String character) {
+		this.setActive(true);
+		this.setCharacter(character);
+	}
+
 	public String getCharacter() {
 		return this.character;
 	}

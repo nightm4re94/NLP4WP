@@ -103,50 +103,38 @@ public class LogAnalyzer {
 
 			// normal typing event
 			if (event.getType().equals("keyboard") && key != null && value != null && position >= 0) {
-
-				// System.out.println("keyPress: position: " + position + "
-				// value: " + value + " key: " + key);
 				if (key.equals("VK_BACK")) {
 					// is there a selection left or right of the current
 					// position? if so,
 					// delete the whole selection from the revised text.
-					if (lastSelectionStart == position - 1 || lastSelectionEnd == position) {
-						for (int i = 0; i < lastSelectionLength; i++) {
-							this.revisedText.deleteSingle(i);
-						}
-					} else if (revisedText.getNumberOfActiveSymbols() > position && position > 0) {
-						this.revisedText.deleteSingle(position);
+//					if (lastSelectionStart == position || lastSelectionEnd == position - 1) {
+//						this.revisedText.deleteMultiple(lastSelectionStart, lastSelectionEnd);
+//					} else 
+						if (revisedText.getNumberOfActiveSymbols() > position && position > 0) {
+						this.revisedText.deleteSingle(position - 1);
 					}
 				} else if (key.equals("VK_DELETE")) {
 					// is there a selection left or right of the current
 					// position? if so,
 					// delete the whole selection from the revised text.
-					if (lastSelectionStart == position - 1 || lastSelectionEnd == position) {
-						for (int i = 0; i < lastSelectionLength; i++) {
-							this.revisedText.deleteMultiple(i, i);
-						}
-					} else if (revisedText.getNumberOfActiveSymbols() > position && position > 0) {
-						this.revisedText.deleteSingle(position + 1);
+					// if (lastSelectionStart == position - 1 ||
+					// lastSelectionEnd == position) {
+					// this.revisedText.deleteMultiple(lastSelectionStart,
+					// lastSelectionEnd);
+					// } else
+						if (revisedText.getNumberOfActiveSymbols() > position && position > 0) {
+						this.revisedText.deleteSingle(position);
 					}
 				} else {
-					Symbol newSymbol = new Symbol(this.revisedText.getRevision(), value);
-					if (position == this.revisedText.getNumberOfActiveSymbols()) {
-						this.revisedText.add(newSymbol);
-					} else {
-						this.revisedText.insertSingle(position, newSymbol);
+					if (!value.equals("STARTOFHEADING")) {
+						this.revisedText.insertSingle(position + 1, new Symbol(value));
 					}
-					// System.out.println(position + " - " + value);
-					// System.out.println(this.revisedText.get(position).getCharacter());
 				}
 			}
 			// // replacement events
-			// TODO: Add revision handling (deleting and inserting)
 			else if (event.getType().equals("replacement") && start >= 0 && end >= 0 && newText != null
-					&& !newText.isEmpty()) {
-				// System.out.println("replacement: startIndex: " + start + "
-				// endIndex: " + end + " newText: " + newText);
-				// System.out.println((end - start));
-				// System.out.println(start + " - " + end + " - " + newText);
+					&& !newText.isEmpty() && !newText.equals("STARTOFHEADING")) {
+
 				SymbolContainer s = new SymbolContainer();
 				for (Character c : newText.toCharArray()) {
 					s.add(new Symbol(this.revisedText.getRevision(), c.toString()));
@@ -155,9 +143,6 @@ public class LogAnalyzer {
 			}
 			// insertion events (Zwischenablage o.Ä.)
 			else if (event.getType().equals("insert") && position >= 0 && before != null && after != null) {
-				// System.out.println(
-				// "insertion: position: " + position + " text before: " +
-				// before + " text after: " + after);
 				SymbolContainer s = new SymbolContainer();
 				for (Character c : after.toCharArray()) {
 					s.add(new Symbol(this.revisedText.getRevision(), c.toString()));
@@ -175,8 +160,8 @@ public class LogAnalyzer {
 		// System.out.println(rev.getLastPosition());
 		// }
 		System.out.println("Nr. of revisions: " + this.revisedText.getRevision());
-		System.out.println("The total text is " + (this.revisedText.getNumberOfActiveSymbols()) + "/" + charsInclSpaces
-				+ " characters long.");
+		System.out.println("Nr. of active Symbols / Chars including spaces: "
+				+ (this.revisedText.getNumberOfActiveSymbols()) + "/" + charsInclSpaces + " characters long.");
 		// System.out.println(this.revisedText.getActiveChars());
 		System.out.println(this.revisedText.toString());
 	}
