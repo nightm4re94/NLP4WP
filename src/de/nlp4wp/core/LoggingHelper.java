@@ -1,4 +1,4 @@
-package de.nlp4wp.bandpeyobaidawilke;
+package de.nlp4wp.core;
 
 public class LoggingHelper {
 

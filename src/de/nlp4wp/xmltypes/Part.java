@@ -1,4 +1,4 @@
-package de.nlp4wp.bandpeyobaidawilke.xmltypes;
+package de.nlp4wp.xmltypes;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;

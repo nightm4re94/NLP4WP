@@ -1,4 +1,4 @@
-package de.nlp4wp.bandpeyobaidawilke.xmltypes;
+package de.nlp4wp.xmltypes;
 
 import java.util.List;
 

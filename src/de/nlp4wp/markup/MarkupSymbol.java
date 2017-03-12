@@ -1,4 +1,4 @@
-package de.nlp4wp.bandpeyobaidawilke.markup;
+package de.nlp4wp.markup;
 
 public abstract class MarkupSymbol extends Symbol {
 

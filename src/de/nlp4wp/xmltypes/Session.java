@@ -1,15 +1,15 @@
-package de.nlp4wp.bandpeyobaidawilke.xmltypes;
+package de.nlp4wp.xmltypes;
 
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "meta")
-public class Meta {
+@XmlRootElement(name = "session")
+public class Session {
+	@XmlElement(name = "entry")
 	private List<Entry> entryList;
 
-	@XmlElement(name = "entry")
 	public List<Entry> getEntries() {
 		return this.entryList;
 	}

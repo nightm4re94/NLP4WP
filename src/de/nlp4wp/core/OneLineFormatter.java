@@ -1,4 +1,4 @@
-package de.nlp4wp.bandpeyobaidawilke;
+package de.nlp4wp.core;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
