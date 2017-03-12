@@ -3,8 +3,16 @@ package de.nlp4wp.bandpeyobaidawilke;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import de.nlp4wp.bandpeyobaidawilke.markup.Symbol;
 import de.nlp4wp.bandpeyobaidawilke.markup.SymbolContainer;
@@ -12,6 +20,7 @@ import de.nlp4wp.bandpeyobaidawilke.xmltypes.Entry;
 import de.nlp4wp.bandpeyobaidawilke.xmltypes.Event;
 import de.nlp4wp.bandpeyobaidawilke.xmltypes.Log;
 import de.nlp4wp.bandpeyobaidawilke.xmltypes.Part;
+import de.nlp4wp.bandpeyobaidawilke.xmltypes.SNotation;
 
 public class LogAnalyzer {
 	private final Log log;
@@ -21,6 +30,7 @@ public class LogAnalyzer {
 
 	private final List<Event> eventList;
 	private final SymbolContainer revisedText;
+	private SNotation output;
 
 	public LogAnalyzer(final Log log) {
 		this.log = log;
@@ -28,6 +38,7 @@ public class LogAnalyzer {
 		this.sessionEntries = new ArrayList<>();
 		this.eventList = new ArrayList<>();
 		this.revisedText = new SymbolContainer();
+		this.output = new SNotation();
 		this.addMetaEntries();
 		this.addSessionEntries();
 		this.addEvents();
@@ -35,7 +46,7 @@ public class LogAnalyzer {
 
 	public void analyzeLog() {
 
-		int lastSelectionStart = -1, lastSelectionEnd = -1, lastSelectionLength = -1;
+		int lastSelectionStart = -1, lastSelectionEnd = -1;
 		int charsInclSpaces = 0, charsExclSpaces = 0;
 
 		for (final Event event : this.eventList) {
@@ -98,7 +109,6 @@ public class LogAnalyzer {
 			if (event.getType().equals("selection") && start >= 0 && end >= 0) {
 				lastSelectionStart = start;
 				lastSelectionEnd = end;
-				lastSelectionLength = end - start;
 			}
 
 			// normal typing event
@@ -107,22 +117,18 @@ public class LogAnalyzer {
 					// is there a selection left or right of the current
 					// position? if so,
 					// delete the whole selection from the revised text.
-//					if (lastSelectionStart == position || lastSelectionEnd == position - 1) {
-//						this.revisedText.deleteMultiple(lastSelectionStart, lastSelectionEnd);
-//					} else 
-						if (revisedText.getNumberOfActiveSymbols() > position && position > 0) {
+					if (lastSelectionStart == position || lastSelectionEnd == position - 1) {
+						this.revisedText.deleteMultiple(lastSelectionStart, lastSelectionEnd);
+					} else if (revisedText.getNumberOfActiveSymbols() > position && position > 0) {
 						this.revisedText.deleteSingle(position - 1);
 					}
 				} else if (key.equals("VK_DELETE")) {
 					// is there a selection left or right of the current
 					// position? if so,
 					// delete the whole selection from the revised text.
-					// if (lastSelectionStart == position - 1 ||
-					// lastSelectionEnd == position) {
-					// this.revisedText.deleteMultiple(lastSelectionStart,
-					// lastSelectionEnd);
-					// } else
-						if (revisedText.getNumberOfActiveSymbols() > position && position > 0) {
+					if (lastSelectionStart == position - 1 || lastSelectionEnd == position) {
+						this.revisedText.deleteMultiple(lastSelectionStart, lastSelectionEnd);
+					} else if (revisedText.getNumberOfActiveSymbols() >= position && position > 0) {
 						this.revisedText.deleteSingle(position);
 					}
 				} else {
@@ -139,7 +145,7 @@ public class LogAnalyzer {
 				for (Character c : newText.toCharArray()) {
 					s.add(new Symbol(this.revisedText.getRevision(), c.toString()));
 				}
-				this.revisedText.replace(start, end, s);
+				this.revisedText.replaceMultiple(start, end, s);
 			}
 			// insertion events (Zwischenablage o.Ä.)
 			else if (event.getType().equals("insert") && position >= 0 && before != null && after != null) {
@@ -150,34 +156,36 @@ public class LogAnalyzer {
 				this.revisedText.insertMultiple(position, s);
 			}
 		}
-		System.out.println(this.log.getFilePath());
-		// for (
-		//
-		// final Revision rev : this.log.getRevisions()) {
-		// System.out.println(rev.getClass().getName() + " " +
-		// rev.getSequentialNumber() + " - "
-		// + rev.getFirstPosition() + " - " + rev.getRevisionSymbols());
-		// System.out.println(rev.getLastPosition());
-		// }
-		System.out.println("Nr. of revisions: " + this.revisedText.getRevision());
-		System.out.println("Nr. of active Symbols / Chars including spaces: "
-				+ (this.revisedText.getNumberOfActiveSymbols()) + "/" + charsInclSpaces + " characters long.");
-		// System.out.println(this.revisedText.getActiveChars());
-		System.out.println(this.revisedText.toString());
+
+		Program.LOGGER.log(Level.INFO, "Successfully analyzed log: " + this.log.getFilePath());
+		Program.LOGGER.log(Level.INFO, "Nr. of revisions: " + this.revisedText.getRevision());
+		Program.LOGGER.log(Level.INFO,
+				"Nr. of active Symbols / Chars including spaces / Chars excluding spaces: "
+						+ (this.revisedText.getNumberOfActiveSymbols()) + "/" + charsInclSpaces + "/" + charsExclSpaces
+						+ " characters long.");
 	}
 
 	public void flushToFile() {
+		this.output.setMarkup(this.revisedText.toString());
+		this.output.setMeta(this.log.getMeta());
+		this.output.setSession(this.log.getSession());
 		File f1 = new File(log.getFilePath());
-		File f = new File("resources/OUTPUT/" + f1.getName() + "_OUTPUT.txt");
+		File f = new File("resources/OUTPUT/" + f1.getName() + "_SN.xml");
 
 		try {
 			f.createNewFile();
-			PrintWriter writer = new PrintWriter(f, "UTF-8");
-			writer.write(this.revisedText.toString());
-			writer.close();
-		} catch (IOException e) {
+			JAXBContext jaxbContext = JAXBContext.newInstance(SNotation.class);
+			final Marshaller marshaller = jaxbContext.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+			marshaller.marshal(this.output, f);
+
+			Program.LOGGER.log(Level.INFO, "Created S-Notation: " + f.getPath());
+		} catch (JAXBException | IOException e) {
+			// TODO Auto-generated catch block
 			Program.logException(e);
 		}
+
 	}
 
 	private void addEvents() {

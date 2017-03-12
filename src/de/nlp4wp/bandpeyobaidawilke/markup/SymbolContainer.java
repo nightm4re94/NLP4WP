@@ -25,11 +25,11 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		if (position < 0 || this.getSingle(position) == null) {
 			return;
 		}
-		// if (!this.isNeighbor(position, this.lastDeletePosition)) {
-		// this.nextRevision();
-		// this.add(position + 1, new RightBracket(this.getRevision()));
-		// this.add(position, new LeftBracket(this.getRevision()));
-		// }
+		 if (!this.isNeighbor(position, this.lastDeletePosition)) {
+		 this.nextRevision();
+		 this.add(position + 1, new RightBracket(this.getRevision()));
+		 this.add(position, new LeftBracket(this.getRevision()));
+		 }
 		Symbol s = this.getSingle(position);
 		s.setActive(false);
 		this.setLastDeletePosition(super.indexOf(s));
@@ -155,9 +155,14 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		this.currentRevision = 0;
 	}
 
-	public void replace(final int firstPos, final int lastPos, final SymbolContainer c) {
+	public void replaceMultiple(final int firstPos, final int lastPos, final SymbolContainer c) {
 		this.deleteMultiple(firstPos, lastPos);
 		this.insertMultiple(firstPos, c);
+	}
+
+	public void replaceSingle(final int position, final Symbol s) {
+		this.deleteSingle(position);
+		this.insertSingle(position, s);
 	}
 
 	public void setActive(final int position, final boolean active) {

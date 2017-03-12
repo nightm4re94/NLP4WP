@@ -9,7 +9,8 @@
 *.class
 
 # Log file
-log.xml
+*.xml
+*.lck
 
 # eclipse specific git ignore
 *.pydevproject

@@ -1,10 +1,7 @@
 package de.nlp4wp.bandpeyobaidawilke;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +11,7 @@ import java.nio.file.Paths;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+
 import de.nlp4wp.bandpeyobaidawilke.xmltypes.Log;
 
 public class IDFXReader {
@@ -33,14 +31,15 @@ public class IDFXReader {
 		}
 	}
 
-	// delete characters known to be illegal in XML
+	// delete characters known to be illegal in XML (the "&" character is
+	// illegal and needs to be escaped)
 	private void preprocessFile(final File file) {
 		String fileContent = "";
 		Path path = Paths.get(file.getPath());
 		Charset charset = StandardCharsets.UTF_8;
 		try {
 			fileContent = new String(Files.readAllBytes(path), charset);
-			fileContent = fileContent.replaceAll("&#x8;", "BACKSPACE").replaceAll("&#x1;", "STARTOFHEADING");
+			fileContent = fileContent.replaceAll("&#", "&amp;#");
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
 			writer.write(fileContent);
 			writer.close();

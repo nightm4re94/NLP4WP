@@ -1,7 +1,6 @@
 package de.nlp4wp.bandpeyobaidawilke.xmltypes;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -11,8 +10,8 @@ public class Log {
 
 	private Meta meta;
 	private Session session;
+
 	private List<Event> eventList;
-	private Map<Integer, String> finalText;
 	private String filePath;
 
 	@XmlElement(name = "event")
@@ -22,10 +21,6 @@ public class Log {
 
 	public String getFilePath() {
 		return this.filePath;
-	}
-
-	public Map<Integer, String> getFinalText() {
-		return this.finalText;
 	}
 
 	@XmlElement(name = "meta")
@@ -53,5 +48,7 @@ public class Log {
 	public void setSession(final Session session) {
 		this.session = session;
 	}
+
+
 
 }

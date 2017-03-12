@@ -6,20 +6,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "part")
 public class Part {
-	private String type;
-	private String button;
-	private String key;
-	private String value;
-	private int x;
-	private int y;
-	private long startTime;
-	private long endTime;
-	private String title;
-	private String before;
-	private String after;
+	private String type = null;
+	private String button = null;
+	private String key = null;
+	private String value = null;
+	private int x = -1;
+	private int y = -1;
+	private long startTime = -1;
+	private long endTime = -1;
+	private String title = null;
+	private String before = null;
+	private String after = null;
 	private int start = -1;
 	private int end = -1;
-	private String newText;
+	private String newText = null;
 	private int position = -1;
 
 	private boolean replay;
