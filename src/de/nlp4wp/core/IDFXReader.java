@@ -35,16 +35,16 @@ public class IDFXReader {
 	// illegal and needs to be escaped)
 	private void preprocessFile(final File file) {
 		String fileContent = "";
-		Path path = Paths.get(file.getPath());
-		Charset charset = StandardCharsets.UTF_8;
+		final Path path = Paths.get(file.getPath());
+		final Charset charset = StandardCharsets.UTF_8;
 		try {
 			fileContent = new String(Files.readAllBytes(path), charset);
 			fileContent = fileContent.replaceAll("&#", "&amp;#");
-			PrintWriter writer = new PrintWriter(file, "UTF-8");
+			final PrintWriter writer = new PrintWriter(file, "UTF-8");
 			writer.write(fileContent);
 			writer.close();
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			Program.logException(e);
 		} finally {
 		}

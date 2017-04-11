@@ -26,7 +26,7 @@ public class LogAnalyzer {
 
 	private final List<Event> eventList;
 	private final SymbolContainer revisedText;
-	private SNotation output;
+	private final SNotation output;
 
 	public LogAnalyzer(final Log log) {
 		this.log = log;
@@ -115,7 +115,7 @@ public class LogAnalyzer {
 					// delete the whole selection from the revised text.
 					if (lastSelectionStart == position || lastSelectionEnd == position - 1) {
 						this.revisedText.deleteMultiple(lastSelectionStart, lastSelectionEnd);
-					} else if (revisedText.getNumberOfActiveSymbols() > position && position > 0) {
+					} else if (this.revisedText.getNumberOfActiveSymbols() > position && position > 0) {
 						this.revisedText.deleteSingle(position - 1);
 					}
 				} else if (key.equals("VK_DELETE")) {
@@ -124,7 +124,7 @@ public class LogAnalyzer {
 					// delete the whole selection from the revised text.
 					if (lastSelectionStart == position - 1 || lastSelectionEnd == position) {
 						this.revisedText.deleteMultiple(lastSelectionStart, lastSelectionEnd);
-					} else if (revisedText.getNumberOfActiveSymbols() >= position && position > 0) {
+					} else if (this.revisedText.getNumberOfActiveSymbols() >= position && position > 0) {
 						this.revisedText.deleteSingle(position);
 					}
 				} else {
@@ -135,27 +135,26 @@ public class LogAnalyzer {
 			else if (event.getType().equals("replacement") && start >= 0 && end >= 0 && newText != null
 					&& !newText.isEmpty() && !newText.equals("STARTOFHEADING")) {
 
-				SymbolContainer s = new SymbolContainer();
-				for (Character c : newText.toCharArray()) {
+				final SymbolContainer s = new SymbolContainer();
+				for (final Character c : newText.toCharArray()) {
 					s.add(new Symbol(c.toString()));
 				}
 				this.revisedText.replaceMultiple(start, end, s);
 			}
 			// insertion events (Zwischenablage o.Ä.)
 			else if (event.getType().equals("insert") && position >= 0 && before != null && after != null) {
-				SymbolContainer s = new SymbolContainer();
-				for (Character c : after.toCharArray()) {
+				final SymbolContainer s = new SymbolContainer();
+				for (final Character c : after.toCharArray()) {
 					s.add(new Symbol(c.toString()));
 				}
 				this.revisedText.insertMultiple(position, s);
 			}
 		}
-		this.revisedText.cleanup();
 		Program.LOGGER.log(Level.INFO, "Successfully analyzed log: " + this.log.getFilePath());
 		Program.LOGGER.log(Level.INFO, "Nr. of revisions: " + this.revisedText.getRevision());
 		Program.LOGGER.log(Level.INFO,
 				"Nr. of active Symbols / Chars including spaces / Chars excluding spaces: "
-						+ (this.revisedText.getNumberOfActiveSymbols()) + "/" + charsInclSpaces + "/" + charsExclSpaces
+						+ this.revisedText.getNumberOfActiveSymbols() + "/" + charsInclSpaces + "/" + charsExclSpaces
 						+ " characters long.");
 	}
 
@@ -163,12 +162,12 @@ public class LogAnalyzer {
 		this.output.setMarkup(this.revisedText.toString());
 		this.output.setMeta(this.log.getMeta());
 		this.output.setSession(this.log.getSession());
-		File f1 = new File(log.getFilePath());
-		File f = new File("resources/OUTPUT/" + f1.getName() + "_SN.xml");
+		final File f1 = new File(this.log.getFilePath());
+		final File f = new File("resources/OUTPUT/" + f1.getName() + "_SN.xml");
 
 		try {
 			f.createNewFile();
-			JAXBContext jaxbContext = JAXBContext.newInstance(SNotation.class);
+			final JAXBContext jaxbContext = JAXBContext.newInstance(SNotation.class);
 			final Marshaller marshaller = jaxbContext.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");

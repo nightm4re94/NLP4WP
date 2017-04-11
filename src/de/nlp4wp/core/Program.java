@@ -51,8 +51,8 @@ public class Program {
 	private List<String> filePaths;
 
 	private Program() {
-		Program.this.filePaths = new ArrayList<>();
-		Program.this.logs = new ArrayList<>();
+		Program.instance().filePaths = new ArrayList<>();
+		Program.instance().logs = new ArrayList<>();
 		final ConsoleHandler handler = new ConsoleHandler();
 		handler.setFormatter(new de.nlp4wp.core.OneLineFormatter());
 		handler.setLevel(Level.ALL);

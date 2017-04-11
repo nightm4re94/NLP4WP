@@ -13,19 +13,7 @@ public class SNotation {
 
 	@XmlElement(name = "markup")
 	public String getMarkup() {
-		return markup;
-	}
-
-	public void setMarkup(String markup) {
-		this.markup = markup;
-	}
-
-	public void setMeta(final Meta meta) {
-		this.meta = meta;
-	}
-
-	public void setSession(final Session session) {
-		this.session = session;
+		return this.markup;
 	}
 
 	@XmlElement(name = "meta")
@@ -36,6 +24,18 @@ public class SNotation {
 	@XmlElement(name = "session")
 	public Session getSession() {
 		return this.session;
+	}
+
+	public void setMarkup(final String markup) {
+		this.markup = markup;
+	}
+
+	public void setMeta(final Meta meta) {
+		this.meta = meta;
+	}
+
+	public void setSession(final Session session) {
+		this.session = session;
 	}
 
 }

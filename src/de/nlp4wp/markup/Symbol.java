@@ -21,16 +21,12 @@ public class Symbol {
 		return this.character;
 	}
 
-	public int getRevisionNumber() {
-		return this.revisionNumber;
-	}
-
-	public void setRevisionNumber(final int revisionNumber) {
-		this.revisionNumber = revisionNumber;
-	}
-
 	public int getPositionCount() {
 		return this.positionCount;
+	}
+
+	public int getRevisionNumber() {
+		return this.revisionNumber;
 	}
 
 	public boolean isActive() {
@@ -44,6 +40,10 @@ public class Symbol {
 
 	public void setCharacter(final String character) {
 		this.character = character;
+	}
+
+	public void setRevisionNumber(final int revisionNumber) {
+		this.revisionNumber = revisionNumber;
 	}
 
 }

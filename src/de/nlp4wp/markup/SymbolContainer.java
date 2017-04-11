@@ -1,6 +1,5 @@
 package de.nlp4wp.markup;
 
-import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
@@ -29,17 +28,17 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		if (position < 0 || this.getSingle(position) == null) {
 			return;
 		}
-		Symbol s = this.getSingle(position);
+		final Symbol s = this.getSingle(position);
 		int tmp = this.indexOf(s);
 		this.remove(tmp);
 
 		if (tmp > 0) {
-			Symbol previous = this.get(tmp - 1);
+			final Symbol previous = this.get(tmp - 1);
 			if (previous instanceof RightBracket && previous.getRevisionNumber() == this.getRevision()) {
 				tmp--;
 			}
 		}
-		if ((position != this.getLastDeletePosition())) {
+		if (position != this.getLastDeletePosition()) {
 			this.nextDeleteRevision();
 			this.add(tmp, new RightBracket(this.getRevision()));
 			this.add(tmp, s);
@@ -52,6 +51,10 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		s.setRevisionNumber(this.getRevision());
 		this.setLastDeletePosition(position);
 		this.lastDeleteIndex = tmp;
+	}
+
+	public void firstRevision() {
+		this.currentRevision = 0;
 	}
 
 	public String getActiveChars() {
@@ -89,6 +92,11 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		return symbols;
 	}
 
+	public Symbol getNext(final Symbol symbol) {
+		final Symbol next = this.get(this.indexOf(symbol) + 1);
+		return next;
+	}
+
 	public int getNumberOfActiveSymbols() {
 		int tmp = -1;
 		for (final Symbol symbol : this) {
@@ -97,18 +105,13 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		return tmp + 1;
 	}
 
-	public int getRevision() {
-		return this.currentRevision;
-	}
-
 	public Symbol getPrevious(final Symbol symbol) {
 		final Symbol previous = this.get(this.indexOf(symbol) - 1);
 		return previous;
 	}
 
-	public Symbol getNext(final Symbol symbol) {
-		final Symbol next = this.get(this.indexOf(symbol) + 1);
-		return next;
+	public int getRevision() {
+		return this.currentRevision;
 	}
 
 	public Symbol getSingle(final int position) {
@@ -123,7 +126,7 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 	}
 
 	public void insertMultiple(final int position, final SymbolContainer symbols) {
-		for (Symbol s : symbols) {
+		for (final Symbol s : symbols) {
 			this.insertSingle(position + symbols.indexOf(s), s);
 
 		}
@@ -135,16 +138,16 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 			return;
 		}
 
-		int tmp = this.indexOf(this.getSingle(position));
-		int positionToAdd = (tmp == -1) ? this.size() : tmp;
+		final int tmp = this.indexOf(this.getSingle(position));
+		int positionToAdd = tmp == -1 ? this.size() : tmp;
 		if (positionToAdd > 0) {
-			Symbol previous = this.get(positionToAdd - 1);
+			final Symbol previous = this.get(positionToAdd - 1);
 			if (previous instanceof RightBrace && previous.getRevisionNumber() == this.getRevision()) {
 				positionToAdd--;
 			}
 		}
 		// not inserting at the end and not appending to an existing revision
-		if ((position != this.getLastInsertPosition() + 1) && position != this.getNumberOfActiveSymbols()) {
+		if (position != this.getLastInsertPosition() + 1 && position != this.getNumberOfActiveSymbols()) {
 			this.nextInsertRevision();
 			this.add(positionToAdd, new RightBrace(this.getRevision()));
 			symbol.setRevisionNumber(this.getRevision());
@@ -165,29 +168,25 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		this.setLastInsertPosition(position);
 	}
 
-	public void nextInsertRevision() {
-		this.highestRevision++;
-		this.currentRevision = this.highestRevision;
-		int tmp = this.indexOf(this.getSingle(this.getLastEditPosition() + 1));
-		int positionToAdd = (tmp == -1) ? this.size() : tmp;
-		Break b = new Break(this.getRevision());
-		this.add(positionToAdd, b);
-	}
-
 	public void nextDeleteRevision() {
 		this.highestRevision++;
 		this.currentRevision = this.highestRevision;
 		int tmp = this.lastDeleteIndex;
-		tmp = (tmp == -1) ? this.size() : tmp;
+		tmp = tmp == -1 ? this.size() : tmp;
 		while (tmp < this.size() && !this.get(tmp).isActive()) {
 			tmp++;
 		}
-		Break b = new Break(this.getRevision());
+		final Break b = new Break(this.getRevision());
 		this.add(tmp, b);
 	}
 
-	public void firstRevision() {
-		this.currentRevision = 0;
+	public void nextInsertRevision() {
+		this.highestRevision++;
+		this.currentRevision = this.highestRevision;
+		final int tmp = this.indexOf(this.getSingle(this.getLastEditPosition() + 1));
+		final int positionToAdd = tmp == -1 ? this.size() : tmp;
+		final Break b = new Break(this.getRevision());
+		this.add(positionToAdd, b);
 	}
 
 	public void replaceMultiple(final int firstPos, final int lastPos, final SymbolContainer c) {
@@ -200,38 +199,6 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 		this.insertSingle(position, s);
 	}
 
-	private void setLastEditPosition(final int editPosition) {
-		this.lastEditPosition = editPosition;
-	}
-
-	private void setLastDeletePosition(final int editPosition) {
-		this.setLastEditPosition(editPosition);
-		this.lastDeletePosition = editPosition;
-	}
-
-	private void setLastInsertPosition(final int editPosition) {
-		this.setLastEditPosition(editPosition);
-		this.lastInsertPosition = editPosition;
-	}
-
-	public void cleanup() {
-		for (Symbol s : this) {
-			if (s instanceof RightBrace) {
-				while (this.indexOf(s) < this.size() - 1 && !this.getNext(s).isActive()
-						&& !(this.getNext(s) instanceof LeftBrace && this.getNext(this.getNext(s)).isActive())
-						&& !(this.getNext(s) instanceof Break
-								&& this.getNext(s).getRevisionNumber() >= s.getRevisionNumber())) {
-					Collections.swap(this, this.indexOf(s), this.indexOf(s) + 1);
-				}
-			} else if (s instanceof Break) {
-				while (this.indexOf(s) < this.size() - 1 && this.getNext(s) instanceof Break
-						&& this.getNext(s).getRevisionNumber() < s.getRevisionNumber()) {
-					Collections.swap(this, this.indexOf(s), this.indexOf(s) + 1);
-				}
-			}
-		}
-	}
-
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();
@@ -239,5 +206,19 @@ public class SymbolContainer extends CopyOnWriteArrayList<Symbol> {
 			builder.append(c.getCharacter());
 		}
 		return builder.toString();
+	}
+
+	private void setLastDeletePosition(final int editPosition) {
+		this.setLastEditPosition(editPosition);
+		this.lastDeletePosition = editPosition;
+	}
+
+	private void setLastEditPosition(final int editPosition) {
+		this.lastEditPosition = editPosition;
+	}
+
+	private void setLastInsertPosition(final int editPosition) {
+		this.setLastEditPosition(editPosition);
+		this.lastInsertPosition = editPosition;
 	}
 }

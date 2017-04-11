@@ -9,7 +9,7 @@ import de.nlp4wp.markup.SymbolContainer;
 public class LogAnalyzationTest {
 	@Test
 	public void testBLA() {
-		SymbolContainer s = new SymbolContainer();
+		final SymbolContainer s = new SymbolContainer();
 		s.insertSingle(0, new Symbol("a"));
 		s.insertSingle(1, new Symbol("b"));
 		s.insertSingle(2, new Symbol("c"));
@@ -30,7 +30,7 @@ public class LogAnalyzationTest {
 
 	@Test
 	public void testBLUB() {
-		SymbolContainer s = new SymbolContainer();
+		final SymbolContainer s = new SymbolContainer();
 		s.insertSingle(0, new Symbol("a"));
 		s.insertSingle(1, new Symbol("b"));
 		s.insertSingle(2, new Symbol("c"));
@@ -46,7 +46,7 @@ public class LogAnalyzationTest {
 
 	@Test
 	public void testHURZ() {
-		SymbolContainer s = new SymbolContainer();
+		final SymbolContainer s = new SymbolContainer();
 		s.insertSingle(0, new Symbol("a"));
 		s.insertSingle(1, new Symbol("b"));
 		s.insertSingle(2, new Symbol("c"));
@@ -54,8 +54,8 @@ public class LogAnalyzationTest {
 		Assert.assertEquals("abcd", s.toString());
 		s.insertSingle(1, new Symbol("p"));
 		Assert.assertEquals("a{p}(1)bcd|(1)", s.toString());
-//		s.deleteMultiple(0, 1);
-//		Assert.assertEquals("[a{p}(1)](2)|(2)bcd|(1)", s.toString());
+		// s.deleteMultiple(0, 1);
+		// Assert.assertEquals("[a{p}(1)](2)|(2)bcd|(1)", s.toString());
 
 	}
 }
